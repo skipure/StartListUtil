@@ -1,33 +1,37 @@
 var fs = require('fs'); 
 var csv = require('fast-csv');
 
+var dir = process.argv.length>2 ? process.argv[2] : "input";
+var ouputDir = process.argv.length>2 ? process.argv[2] : "output";
 var files = [];
-
-for (let j = 0; j < process.argv.length; j++) {  
-	if (j > 1){
-		files.push(process.argv[j]);
-	}
-}
-
 
 var availablebibs={};
 var bibs={};
 var temporaryBibSlot=1;
 
+LoadInputFiles();
 LoadPermanentBibs(function(){
 	LoadAvailableBibs(function(){
 		files.map(LoadStartList);
 	});
 });
 
+function LoadInputFiles(){
+	fs.readdir(dir, function(err, items) {	 
+	    for (var i=0; i<items.length; i++) {
+	        files.push(items[i]);
+	    }
+	});
+}
+
 function LoadStartList(filename){
 	var csvStream = csv.createWriteStream({headers: false}),
-		writableStream = fs.createWriteStream("output_"+filename);
+		writableStream = fs.createWriteStream(ouputDir+'/ouput_'+filename);
 
 	csvStream.pipe(writableStream);
 
 	var headers = ["Bib","Club","First","Last","Year of Birth","USSS Number","Sex (Masters or XC)","Cross Reference 1","Cross Reference 2","SRR","USSA Paid","Payment Method","USSS Paid Note","Registration Note","Racer Process Note","<eor>"];
-	LoadCsv(filename, headers, function(data){
+	LoadCsv(dir+'/'+filename, headers, function(data){
 	 	if (data.Bib == ""){
 	 		if (!bibs.hasOwnProperty(data["USSS Number"])){
 	 			bibs[data["USSS Number"]] = availablebibs[temporaryBibSlot++];
