@@ -1,8 +1,11 @@
 var fs = require('fs'); 
 var csv = require('fast-csv');
 
-var dir = process.argv.length>2 ? process.argv[2] : "input";
-var ouputDir = process.argv.length>2 ? process.argv[2] : "output";
+var INPUT = "input";
+var OUTPUT = "output";
+
+var dir = process.argv.length>2 ? process.argv[2] : INPUT;
+var outputDir = process.argv.length>2 ? process.argv[2] : OUTPUT;
 var files = [];
 
 var availablebibs={};
@@ -19,14 +22,16 @@ LoadPermanentBibs(function(){
 function LoadInputFiles(){
 	fs.readdir(dir, function(err, items) {	 
 	    for (var i=0; i<items.length; i++) {
-	        files.push(items[i]);
+	    	if (!items[i].startsWith(OUTPUT)){
+		        files.push(items[i]);
+		    }
 	    }
 	});
 }
 
 function LoadStartList(filename){
 	var csvStream = csv.createWriteStream({headers: false}),
-		writableStream = fs.createWriteStream(ouputDir+'/ouput_'+filename);
+		writableStream = fs.createWriteStream(outputDir+'/'+OUTPUT+'_'+filename);
 
 	csvStream.pipe(writableStream);
 
